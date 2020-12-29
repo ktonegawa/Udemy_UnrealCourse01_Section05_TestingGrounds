@@ -22,10 +22,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+    // To delete all invalid props
+	virtual void Destroyed() override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+private:
+    TArray<AActor*> SpawnedActors;
 	
 };

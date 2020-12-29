@@ -25,6 +25,7 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn)
         AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
         Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
         Spawned->SetActorRelativeLocation(SpawnPoint);
+        SpawnedActors.Add(Spawned);
         Spawned->AddActorLocalOffset(FVector(0, 0, -120));
     }
 }
@@ -43,3 +44,15 @@ void ATile::Tick(float DeltaTime)
 
 }
 
+void ATile::Destroyed()
+{
+    Super::Destroyed();
+    if (SpawnedActors.Num() > 0)
+    {
+        for (AActor* Actor : SpawnedActors)
+        {
+            Actor->Destroy();
+        }
+    }
+    
+}

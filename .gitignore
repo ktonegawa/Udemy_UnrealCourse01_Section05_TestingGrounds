@@ -13,5 +13,8 @@ Saved
 *.xcodeproj
 *.xcworkspace
 Content/Dynamic/Levels/FirstPersonExampleMap_BuiltData.uasset
+Content/Static/TestingGroundPack/GrassPack/*
+Content/Static/TestingGroundPack/IndustryPropsPack4/*
+Content/Static/TestingGroundPack/RockPackProV1/*
 bgf.jar
 bfg.jar

@@ -2,6 +2,8 @@
 
 #include "Tile.h"
 #include "Engine/World.h"
+#include "DrawDebugHelpers.h"
+#include "CollisionQueryParams.h"
 
 
 // Sets default values
@@ -24,9 +26,26 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn)
         UE_LOG(LogTemp, Warning, TEXT("SpawnPoint: %s"), *SpawnPoint.ToCompactString());
         AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
         Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+        //FVector StartTrace = Spawned->GetActorLocation();
+        //GetWorld()->LineTraceSingleByChannel(*hitResult, SpawnPoint, EndTrace, ECC_Visibility);
         Spawned->SetActorRelativeLocation(SpawnPoint);
+        //Trying to automatically detect the ground via hitResult
+        FVector StartPoint = Spawned->GetActorLocation();
+        FVector EndTrace = StartPoint - FVector(0, 0, 200);
+        //FHitResult hitResult;
+        FHitResult* hitResult2 = new FHitResult();
+        //DrawDebugLine(GetWorld(), StartPoint, EndTrace, FColor::Green, true, -1, 0, 10);
+        //FCollisionQueryParams CollisionParameters;
+        //TArray<AActor*> ignoredActors;
+        //ignoredActors.Add(Spawned);
+        //CollisionParameters.AddIgnoredActors(ignoredActors);
+        //Spawned->ActorLineTraceSingle(hitResult, StartPoint, EndTrace, ECollisionChannel::ECC_WorldStatic, CollisionParameters);
+        GetWorld()->LineTraceSingleByChannel(*hitResult2, StartPoint, EndTrace, ECC_Visibility);
+        //UE_LOG(LogTemp, Warning, TEXT("HitPoint: %s"), *hitResult.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("HitPoint: %s"), *hitResult2->ToString());
+        Spawned->SetActorLocation(hitResult2->Location);
         SpawnedActors.Add(Spawned);
-        Spawned->AddActorLocalOffset(FVector(0, 0, -120));
+        //Spawned->AddActorLocalOffset(FVector(0, 0, -120));
     }
 }
 
@@ -34,7 +53,8 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn)
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-	
+    CastSphere(GetActorLocation(), 300);
+    CastSphere(GetActorLocation() + FVector(0, 0, 1000), 300);
 }
 
 // Called every frame
@@ -42,6 +62,22 @@ void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+bool ATile::CastSphere(FVector Location, float Radius)
+{
+    FHitResult HitResult;
+
+    bool HasHit = GetWorld()->SweepSingleByChannel(
+                            HitResult,
+                            Location,
+                            Location,
+                            FQuat::Identity,
+                            ECollisionChannel::ECC_GameTraceChannel2,
+                            FCollisionShape::MakeSphere(Radius));
+    FColor ResultColor = HasHit ? FColor::Red : FColor::Green; // this reads "if HasHit then Red, else Green"
+    DrawDebugSphere(GetWorld(), Location, Radius, 26, ResultColor, true, -1, 0, 2);
+    return HasHit;
 }
 
 void ATile::Destroyed()

@@ -31,5 +31,7 @@ public:
 
 private:
     TArray<AActor*> SpawnedActors;
+
+    bool CastSphere(FVector Location, float Radius);
 	
 };

@@ -72,18 +72,29 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
     int NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
     for (size_t i = 0; i < NumberToSpawn; i++)
     {
-        FVector SpawnPoint = GetEmptyLocation(Radius);
-        PlaceActor(ToSpawn, SpawnPoint);
+        FVector SpawnPoint;
+        bool found = FindEmptyLocation(SpawnPoint, Radius);
+        if (found) {
+            PlaceActor(ToSpawn, SpawnPoint);
+        }
     }
 }
 
-FVector ATile::GetEmptyLocation(float Radius)
+bool ATile::FindEmptyLocation(FVector& OutLocation, float Radius)
 {
     FVector Min = GetActorTransform().TransformPosition(FVector(0, -2000, 0));
     FVector Max = GetActorTransform().TransformPosition(FVector(4000, 2000, 0));
     FBox Bounds(Min, Max);
-
-    return FMath::RandPointInBox(Bounds);
+    const int MAX_ATTEMPTS = 100;
+    for (size_t i = 0; i < MAX_ATTEMPTS; i++)
+    {
+        FVector CandidatePoint = FMath::RandPointInBox(Bounds);
+        if (CanSpawnAtLocation(CandidatePoint, Radius)) {
+            OutLocation = CandidatePoint;
+            return true;
+        }
+    }
+    return false;
 }
 
 void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint)
@@ -105,7 +116,7 @@ void ATile::BeginPlay()
 	Super::BeginPlay();
     //CastSphere(GetActorLocation(), 300);
     //CastSphere(GetActorLocation() + FVector(0, 0, 1000), 300);
-    CastSphere(GetActorLocation() + FVector(4000, 0, 0), 300);
+    //CanSpawnAtLocation(GetActorLocation() + FVector(4000, 0, 0), 300);
 }
 
 // Called every frame
@@ -115,7 +126,7 @@ void ATile::Tick(float DeltaTime)
 
 }
 
-bool ATile::CastSphere(FVector Location, float Radius)
+bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 {
     FHitResult HitResult;
     bool HasHit = GetWorld()->SweepSingleByChannel(
@@ -127,7 +138,7 @@ bool ATile::CastSphere(FVector Location, float Radius)
                             FCollisionShape::MakeSphere(Radius));
     FColor ResultColor = HasHit ? FColor::Red : FColor::Green; // this reads "if HasHit then Red, else Green"
     DrawDebugSphere(GetWorld(), Location, Radius, 26, ResultColor, true, -1, 0, 2);
-    return HasHit;
+    return !HasHit;
 }
 
 void ATile::Destroyed()

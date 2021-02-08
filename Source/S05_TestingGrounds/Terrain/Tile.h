@@ -16,7 +16,7 @@ public:
 	ATile();
 
     UFUNCTION(BlueprintCallable, Category = "Character")
-    void PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpaw, float Radius = 500);
+    void PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius = 500);
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,12 +30,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-    FVector GetEmptyLocation(float Radius);
+    bool FindEmptyLocation(FVector& OutLocation, float Radius);
 
     void PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint);
     
     TArray<AActor*> SpawnedActors;
 
-    bool CastSphere(FVector Location, float Radius);
+    bool CanSpawnAtLocation(FVector Location, float Radius);
 	
 };

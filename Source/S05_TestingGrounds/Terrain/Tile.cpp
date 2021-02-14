@@ -85,7 +85,7 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 
 bool ATile::FindEmptyLocation(FVector& OutLocation, float Radius)
 {
-    FVector Min = GetActorTransform().TransformPosition(FVector(0, -2000, 0));
+    FVector Min = GetActorTransform().TransformPosition(FVector(200, -2000, 0));
     FVector Max = GetActorTransform().TransformPosition(FVector(4000, 2000, 0));
     FBox Bounds(Min, Max);
     const int MAX_ATTEMPTS = 100;
@@ -141,7 +141,7 @@ bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
                             FQuat::Identity,
                             ECollisionChannel::ECC_Spawn,
                             FCollisionShape::MakeSphere(Radius));
-    //FColor ResultColor = HasHit ? FColor::Red : FColor::Green; // this reads "if HasHit then Red, else Green"
+    FColor ResultColor = HasHit ? FColor::Red : FColor::Green; // this reads "if HasHit then Red, else Green"
     //DrawDebugSphere(GetWorld(), Location, Radius, 26, ResultColor, true, -1, 0, 2);
     return !HasHit;
 }

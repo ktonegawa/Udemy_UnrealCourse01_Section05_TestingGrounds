@@ -5,6 +5,7 @@
 #include "DrawDebugHelpers.h"
 #include "CollisionQueryParams.h"
 #include "ActorPool.h"
+#include "Runtime/Engine/Classes/AI/Navigation/NavigationSystem.h"
 
 #define ECC_Spawn ECC_GameTraceChannel2
 
@@ -13,6 +14,8 @@ ATile::ATile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+    NavigationBoundsOffset = FVector(2000, 0, 0);
 
     MinExtent = GetActorTransform().TransformPosition(FVector(200, -2000, 0));
     MaxExtent = GetActorTransform().TransformPosition(FVector(4000, 2000, 0));
@@ -35,8 +38,9 @@ void ATile::PositionNavMeshBoundsVolume()
         UE_LOG(LogTemp, Error, TEXT("[%s] Not enough actors in pool."), *GetName());
         return;
     }
-    UE_LOG(LogTemp, Error, TEXT("[%s] checked out: {%s}"), *GetName(), *NavMeshBoundsVolume->GetName());
-    NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
+    UE_LOG(LogTemp, Error, TEXT("[%s] checked out: {%s} at %s"), *GetName(), *NavMeshBoundsVolume->GetName(), *GetActorLocation().ToString());
+    NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + NavigationBoundsOffset);
+    GetWorld()->GetNavigationSystem()->Build();
 }
 
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)

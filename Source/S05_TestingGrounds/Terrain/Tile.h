@@ -34,6 +34,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Spawining")
     FVector MaxExtent;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Navigation")
+    FVector NavigationBoundsOffset;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

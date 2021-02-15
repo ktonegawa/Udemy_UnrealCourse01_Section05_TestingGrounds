@@ -27,6 +27,13 @@ protected:
     // To delete all invalid props
 	virtual void Destroyed() override;
 
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+    UPROPERTY(EditDefaultsOnly, Category="Spawining")
+    FVector MinExtent;
+    UPROPERTY(EditDefaultsOnly, Category = "Spawining")
+    FVector MaxExtent;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -44,4 +51,8 @@ private:
     bool CanSpawnAtLocation(FVector Location, float Radius);
 	
     UActorPool* Pool;
+
+    AActor* NavMeshBoundsVolume;
+
+    void PositionNavMeshBoundsVolume();
 };

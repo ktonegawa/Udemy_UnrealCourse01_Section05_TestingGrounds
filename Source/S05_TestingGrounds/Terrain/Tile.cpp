@@ -14,12 +14,29 @@ ATile::ATile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+    MinExtent = GetActorTransform().TransformPosition(FVector(200, -2000, 0));
+    MaxExtent = GetActorTransform().TransformPosition(FVector(4000, 2000, 0));
+
 }
 
 void ATile::SetPool(UActorPool* InPool)
 {
     UE_LOG(LogTemp, Warning, TEXT("[%s] Setting Pool %s"), *(this->GetName()), *(InPool->GetName()));
     Pool = InPool;
+
+    PositionNavMeshBoundsVolume();
+}
+
+void ATile::PositionNavMeshBoundsVolume()
+{
+    NavMeshBoundsVolume = Pool->Checkout();
+    if (NavMeshBoundsVolume == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("[%s] Not enough actors in pool."), *GetName());
+        return;
+    }
+    UE_LOG(LogTemp, Error, TEXT("[%s] checked out: {%s}"), *GetName(), *NavMeshBoundsVolume->GetName());
+    NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
 }
 
 void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
@@ -92,8 +109,12 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 
 bool ATile::FindEmptyLocation(FVector& OutLocation, float Radius)
 {
-    FVector Min = GetActorTransform().TransformPosition(FVector(200, -2000, 0));
-    FVector Max = GetActorTransform().TransformPosition(FVector(4000, 2000, 0));
+    //FVector Min = GetActorTransform().TransformPosition(MinExtent);
+    FVector Min = GetActorLocation() + MinExtent;
+    //FVector Max = GetActorTransform().TransformPosition(MaxExtent);
+    FVector Max = GetActorLocation() + MaxExtent;
+    //UE_LOG(LogTemp, Warning, TEXT("Min: %s Max: %s"), *Min.ToString(), *Max.ToString());
+    //UE_LOG(LogTemp, Warning, TEXT("GetActorLocation: %s GetActorTransform: %s"), *GetActorLocation().ToString(), *GetActorTransform().ToString());
     FBox Bounds(Min, Max);
     const int MAX_ATTEMPTS = 100;
     for (size_t i = 0; i < MAX_ATTEMPTS; i++)
@@ -117,7 +138,7 @@ void ATile::PlaceActor(TSubclassOf<AActor> ToSpawn, FVector SpawnPoint, float Ro
     FVector EndTrace = SpawnPoint - FVector(0, 0, 200);
     FHitResult hitResult;
     GetWorld()->LineTraceSingleByChannel(hitResult, SpawnPoint, EndTrace, ECC_Visibility);
-    UE_LOG(LogTemp, Warning, TEXT("HitPoint: %s"), *hitResult.ToString());
+    //UE_LOG(LogTemp, Warning, TEXT("HitPoint: %s"), *hitResult.ToString());
     Spawned->SetActorLocation(hitResult.Location);
     SpawnedActors.Add(Spawned);
 }
@@ -130,6 +151,13 @@ void ATile::BeginPlay()
     //CastSphere(GetActorLocation() + FVector(0, 0, 1000), 300);
     //CanSpawnAtLocation(GetActorLocation() + FVector(4000, 0, 0), 300);
 
+}
+
+void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+    UE_LOG(LogTemp, Warning, TEXT("[%s]: EndPlay"), *GetName());
+    Pool->Return(NavMeshBoundsVolume);
 }
 
 // Called every frame

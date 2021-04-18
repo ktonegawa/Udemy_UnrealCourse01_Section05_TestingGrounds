@@ -64,9 +64,13 @@ private:
 
     bool FindEmptyLocation(FVector& OutLocation, float Radius);
 
+    template<class T>
+    void RandomlyPlaceActors(TSubclassOf<T> ToSpawn, int MinSpawn, int MaxSpawn, float Radius = 500, float MinScale = 1, float MaxScale = 1);
+
     void PlaceActor(TSubclassOf<AActor> ToSpawn, FSpawnPosition SpawnPosition);
 
-    void PlaceAIPawn(TSubclassOf<APawn> &ToSpawn, FSpawnPosition SpawnPosition);
+    //void PlaceAIPawn(TSubclassOf<APawn> &ToSpawn, FSpawnPosition SpawnPosition);
+    void PlaceActor(TSubclassOf<APawn> &ToSpawn, FSpawnPosition SpawnPosition);
     
     TArray<AActor*> SpawnedActors;
 

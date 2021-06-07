@@ -128,12 +128,12 @@ void ATile::PlaceActors(TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn,
 
 void ATile::PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int MinSpawn, int MaxSpawn, float Radius)
 {
-    //TArray<FSpawnPosition> SpawnPositions = RandomSpawnPositions(MinSpawn, MaxSpawn, Radius, 1, 1);
-    //for (FSpawnPosition SpawnPosition : SpawnPositions)
-    //{
-    //    PlaceAIPawn(ToSpawn, SpawnPosition);
-    //}
-    RandomlyPlaceActors(ToSpawn, MinSpawn, MaxSpawn, Radius, 1, 1);
+//TArray<FSpawnPosition> SpawnPositions = RandomSpawnPositions(MinSpawn, MaxSpawn, Radius, 1, 1);
+//for (FSpawnPosition SpawnPosition : SpawnPositions)
+//{
+//    PlaceAIPawn(ToSpawn, SpawnPosition);
+//}
+RandomlyPlaceActors(ToSpawn, MinSpawn, MaxSpawn, Radius, 1, 1);
 }
 
 //TArray<FSpawnPosition> ATile::RandomSpawnPositions(int MinSpawn, int MaxSpawn, float Radius, float MinScale, float MaxScale)
@@ -217,7 +217,7 @@ void ATile::PlaceActor(TSubclassOf<APawn> &ToSpawn, FSpawnPosition SpawnPosition
 // Called when the game starts or when spawned
 void ATile::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
     //CastSphere(GetActorLocation(), 300);
     //CastSphere(GetActorLocation() + FVector(0, 0, 1000), 300);
     //CanSpawnAtLocation(GetActorLocation() + FVector(4000, 0, 0), 300);
@@ -227,8 +227,11 @@ void ATile::BeginPlay()
 void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     Super::EndPlay(EndPlayReason);
-    UE_LOG(LogTemp, Warning, TEXT("[%s]: EndPlay"), *GetName());
-    Pool->Return(NavMeshBoundsVolume);
+    if (Pool != nullptr && NavMeshBoundsVolume != nullptr) {
+        UE_LOG(LogTemp, Warning, TEXT("[%s]: EndPlay"), *GetName());
+        Pool->Return(NavMeshBoundsVolume);
+    }
+    
 }
 
 // Called every frame
